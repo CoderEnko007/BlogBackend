@@ -20,11 +20,24 @@ from django.urls import path
 import xadmin
 from BlogBackend.settings import MEDIA_ROOT
 from django.views.static import serve
+from rest_framework.documentation import include_docs_urls
+from rest_framework.routers import DefaultRouter
+
+from blog.views import CategoryViewSet, TagViewSet, PostViewSet
+
+router = DefaultRouter()
+router.register(r'categorys', CategoryViewSet, base_name='categorys')
+router.register(r'tags', TagViewSet, base_name='tags')
+router.register(r'posts', PostViewSet, base_name='posts')
 
 urlpatterns = [
     path('xadmin/', xadmin.site.urls),
+    path('api-auth/', include('rest_framework.urls')),
     path('ueditor/',include('DjangoUeditor.urls')),
     # url(r'^ckeditor/', include('ckeditor_uploader.urls')),
 
     path('media/<path:path>/', serve, {'document_root': MEDIA_ROOT}),
+    path('docs/', include_docs_urls(title='我的博客')),
+
+    url(r'^', include(router.urls)),
 ]
