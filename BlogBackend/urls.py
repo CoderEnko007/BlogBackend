@@ -14,8 +14,17 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls import url, include
 from django.urls import path
 
+import xadmin
+from BlogBackend.settings import MEDIA_ROOT
+from django.views.static import serve
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('xadmin/', xadmin.site.urls),
+    path('ueditor/',include('DjangoUeditor.urls')),
+    # url(r'^ckeditor/', include('ckeditor_uploader.urls')),
+
+    path('media/<path:path>/', serve, {'document_root': MEDIA_ROOT}),
 ]
