@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from datetime import datetime
 
 from blog.models import Category, Tag, Post
-from blog.serializers import CategorySerializer, TagSerializer, PostSerializer
+from blog.serializers import CategorySerializer, TagSerializer, PostSerializer, PostDetailSerializer
 from blog.filters import PostFilter
 
 
@@ -48,4 +48,10 @@ class PostViewSet(viewsets.ModelViewSet):
         post = serializer.save()
         post.modify_time = datetime.now()
         post.save()
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return PostDetailSerializer
+        else:
+            return PostSerializer
 
