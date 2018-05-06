@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from datetime import datetime
 
 from blog.models import Category, Tag, Post
-from blog.serializers import CategorySerializer, TagSerializer, PostSerializer, PostDetailSerializer
+from blog.serializers import CategorySerializer, TagSerializer, ListPostSerializer, DefaultPostSerializer, PostDetailSerializer
 from blog.filters import PostFilter
 
 
@@ -29,13 +29,34 @@ class PostPagination(PageNumberPagination):
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('create_time')
-    serializer_class = PostSerializer
     pagination_class = PostPagination
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     filter_class = PostFilter
     search_fields = ('title', 'summary', 'category__name', 'tags__name', 'author__username')
     ordering_fields = ('create_time', 'modify_time', 'click_nums')
+
+    @staticmethod
+    def update_tags_num():
+        tags = Tag.objects.all()
+        for tag in tags:
+            tag_post = Post.objects.filter(tags__name=tag.name)
+            if tag_post:
+                nums = tag_post.count()
+                new_tag = Tag.objects.get(id=tag.id)
+                new_tag.nums = nums
+                new_tag.save()
+
+    @staticmethod
+    def update_category_num():
+        categorys = Category.objects.all()
+        for category in categorys:
+            category_post = Post.objects.filter(category_id=category.id)
+            if category_post:
+                nums = category_post.count()
+                new_category = Category.objects.get(id=category.id)
+                new_category.nums = nums
+                new_category.save()
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -48,10 +69,24 @@ class PostViewSet(viewsets.ModelViewSet):
         post = serializer.save()
         post.modify_time = datetime.now()
         post.save()
+        self.update_tags_num()
+        self.update_category_num()
+
+    def perform_create(self, serializer):
+        post = serializer.save()
+        self.update_tags_num()
+        self.update_category_num()
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        self.update_tags_num()
+        self.update_category_num()
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return PostDetailSerializer
+        elif self.action == 'list':
+            return ListPostSerializer
         else:
-            return PostSerializer
+            return DefaultPostSerializer
 

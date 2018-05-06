@@ -24,11 +24,13 @@ from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
 
 from blog.views import CategoryViewSet, TagViewSet, PostViewSet
+from users.views import UserViewSet
 
 router = DefaultRouter()
 router.register(r'categorys', CategoryViewSet, base_name='categorys')
 router.register(r'tags', TagViewSet, base_name='tags')
 router.register(r'posts', PostViewSet, base_name='posts')
+router.register(r'users', UserViewSet, base_name='users')
 
 urlpatterns = [
     path('xadmin/', xadmin.site.urls),
