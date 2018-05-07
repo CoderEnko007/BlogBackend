@@ -22,6 +22,7 @@ from BlogBackend.settings import MEDIA_ROOT
 from django.views.static import serve
 from rest_framework.documentation import include_docs_urls
 from rest_framework.routers import DefaultRouter
+from rest_framework_jwt.views import obtain_jwt_token
 
 from blog.views import CategoryViewSet, TagViewSet, PostViewSet
 from users.views import UserViewSet
@@ -40,6 +41,8 @@ urlpatterns = [
 
     path('media/<path:path>/', serve, {'document_root': MEDIA_ROOT}),
     path('docs/', include_docs_urls(title='我的博客')),
+
+    path('login/', obtain_jwt_token),
 
     url(r'^', include(router.urls)),
 ]

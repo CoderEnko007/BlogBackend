@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from rest_framework import viewsets, mixins, filters
+from django.db.models import Q
+from rest_framework import viewsets, mixins, filters, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -8,16 +9,29 @@ from datetime import datetime
 from blog.models import Category, Tag, Post
 from blog.serializers import CategorySerializer, TagSerializer, ListPostSerializer, DefaultPostSerializer, PostDetailSerializer
 from blog.filters import PostFilter
+from utils.permissions import IsOwnerOrReadOnly
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
+    def get_permissions(self):
+        if (self.action == "create")|(self.action == "update")|(self.action == "destroy"):
+            return [permissions.IsAuthenticated()]
+        else:
+            return []
+
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
+    def get_permissions(self):
+        if (self.action == "create")|(self.action == "update")|(self.action == "destroy"):
+            return [permissions.IsAuthenticated()]
+        else:
+            return []
 
 
 class PostPagination(PageNumberPagination):
@@ -30,6 +44,7 @@ class PostPagination(PageNumberPagination):
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('create_time')
     pagination_class = PostPagination
+    # permission_classes = (IsOwnerOrReadOnly, )
 
     filter_backends = (DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter)
     filter_class = PostFilter
@@ -90,3 +105,10 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             return DefaultPostSerializer
 
+    def get_permissions(self):
+        if (self.action=="create")|(self.action=="update")|\
+                (self.action=="destroy")|(self.action=='partial_update'):
+            permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
+            return [permission() for permission in permission_classes]
+        else:
+            return []
