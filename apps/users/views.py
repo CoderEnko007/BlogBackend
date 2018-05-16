@@ -15,7 +15,7 @@ class UserViewSet(viewsets.GenericViewSet,
                   mixins.ListModelMixin):
     queryset = UserProfile.objects.all()
     serializer_class = UserSerializer
-    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
+    # authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     def get_object(self):
         """
@@ -25,7 +25,7 @@ class UserViewSet(viewsets.GenericViewSet,
         return self.request.user
 
     def get_permissions(self):
-        if (self.action == "retrieve")|(self.action == "update"):
+        if (self.action == "update"):
             return [permissions.IsAuthenticated()]
         else:
             return []
