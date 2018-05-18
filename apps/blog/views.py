@@ -109,8 +109,8 @@ class PostViewSet(viewsets.ModelViewSet):
             return DefaultPostSerializer
 
     def get_permissions(self):
-        if (self.action=="create")|(self.action=="update")|\
-                (self.action=="destroy")|(self.action=='partial_update'):
+        if (self.action == "create")|(self.action == "update")|\
+                (self.action == "destroy")|(self.action == 'partial_update'):
             permission_classes = (permissions.IsAuthenticated, IsOwnerOrReadOnly)
             return [permission() for permission in permission_classes]
         else:
@@ -138,3 +138,8 @@ class PostListViewSet(viewsets.GenericViewSet, mixins.ListModelMixin, mixins.Ret
             return PostDetailSerializer
         else:
             return ListPostSerializer
+
+
+class AdminListViewSet(viewsets.GenericViewSet, mixins.ListModelMixin):
+    queryset = Post.objects.all().order_by('-create_time')
+    serializer_class = ListPostSerializer
