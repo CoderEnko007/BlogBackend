@@ -45,6 +45,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100, verbose_name='标题')
     content = UEditorField(imagePath="blogs/images", width=1000, height=300, toolbars="besttome",
                               filePath="blogs/files/", default='', verbose_name='内容')
+    md_content = models.TextField(verbose_name='MarkDown内容', null=True, blank=True)
     create_time = models.DateTimeField(default=datetime.now, verbose_name='创建时间')
     modify_time = models.DateTimeField(default=datetime.now, verbose_name='最后一次修改时间')
     summary = models.TextField(verbose_name='文章摘要', null=True, blank=True)
