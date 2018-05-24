@@ -62,12 +62,7 @@ class DefaultPostSerializer(serializers.ModelSerializer):
                                       'required': '请填写标题',
                                       'blank': '请填写标题',
                                   })
-    category = serializers.PrimaryKeyRelatedField(required=True, label='分类', queryset=Category.objects.all(),
-                                                  error_messages={
-                                                      "blank": "请选择文章分类",
-                                                      "required": "请选择文章分类",
-                                                      "null": "请选择文章分类",
-                                                  })
+    category = serializers.PrimaryKeyRelatedField(label='分类', queryset=Category.objects.all())
     content = serializers.CharField(required=True, label='正文',
                                     error_messages={
                                         'required': '文章正文不能为空',

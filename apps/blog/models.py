@@ -51,9 +51,9 @@ class Post(models.Model):
     summary = models.TextField(verbose_name='文章摘要', null=True, blank=True)
     click_nums = models.IntegerField(default=0, verbose_name='浏览次数')
 
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='文章类别')
+    category = models.ForeignKey(Category, null=True, blank=True, on_delete=models.SET_NULL, verbose_name='文章类别')
     tags = models.ManyToManyField(Tag, blank=True, verbose_name='文章标签')
-    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, verbose_name='文章作者')
+    author = models.ForeignKey(UserProfile, on_delete=models.PROTECT, verbose_name='文章作者')
 
     class Meta:
         verbose_name = '文章信息'

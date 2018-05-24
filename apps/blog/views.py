@@ -1,6 +1,4 @@
-from django.shortcuts import render
-from django.db.models import Q
-from rest_framework import viewsets, mixins, filters, permissions
+from rest_framework import viewsets, mixins, filters, permissions, status
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -9,7 +7,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from datetime import datetime
 
 from blog.models import Category, Tag, Post
-from blog.serializers import CategorySerializer, TagSerializer, ListPostSerializer, DefaultPostSerializer, PostDetailSerializer
+from blog.serializers import CategorySerializer, TagSerializer, ListPostSerializer, DefaultPostSerializer, \
+    PostDetailSerializer
 from blog.filters import PostFilter
 from utils.permissions import IsOwnerOrReadOnly
 
@@ -17,20 +16,51 @@ from utils.permissions import IsOwnerOrReadOnly
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     def get_permissions(self):
-        if (self.action == "create")|(self.action == "update")|(self.action == "destroy"):
+        if (self.action == "create") | (self.action == "update") | (self.action == "destroy"):
             return [permissions.IsAuthenticated()]
         else:
             return []
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        res = self.perform_destroy(instance)
+        if res == status.HTTP_200_OK:
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        else:
+            return res
+
+    def perform_destroy(self, instance):
+        categorys = Category.objects.filter(name=r'默认分类')
+        if len(categorys) <= 0:
+            default_cate = Category(name=r'默认分类')
+            default_cate.save()
+        else:
+            default_cate = categorys[0]
+
+        if instance.id == default_cate.id:
+            return Response({
+                'name': '不能删除默认分类'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        posts = Post.objects.filter(category_id=instance.id)
+        for post in posts:
+            post.category_id = default_cate.id
+            post.save()
+        instance.delete()
+        PostViewSet.update_category_num()
+        return status.HTTP_200_OK
 
 
 class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    authentication_classes = (JSONWebTokenAuthentication, SessionAuthentication)
 
     def get_permissions(self):
-        if (self.action == "create")|(self.action == "update")|(self.action == "destroy"):
+        if (self.action == "create") | (self.action == "update") | (self.action == "destroy"):
             return [permissions.IsAuthenticated()]
         else:
             return []
@@ -59,22 +89,20 @@ class PostViewSet(viewsets.ModelViewSet):
         tags = Tag.objects.all()
         for tag in tags:
             tag_post = Post.objects.filter(tags__name=tag.name)
-            if tag_post:
-                nums = tag_post.count()
-                new_tag = Tag.objects.get(id=tag.id)
-                new_tag.nums = nums
-                new_tag.save()
+            nums = tag_post.count()
+            new_tag = Tag.objects.get(id=tag.id)
+            new_tag.nums = nums
+            new_tag.save()
 
     @staticmethod
     def update_category_num():
         categorys = Category.objects.all()
         for category in categorys:
             category_post = Post.objects.filter(category_id=category.id)
-            if category_post:
-                nums = category_post.count()
-                new_category = Category.objects.get(id=category.id)
-                new_category.nums = nums
-                new_category.save()
+            nums = category_post.count()
+            new_category = Category.objects.get(id=category.id)
+            new_category.nums = nums
+            new_category.save()
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -92,6 +120,12 @@ class PostViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         post = serializer.save()
+        # post_tags = post.tags
+        # for tag in post_tags:
+        #     filter_tag = Tag.objects.filter(name=tag.name)
+        #     if len(filter_tag) <= 0:
+        #         new_tag = Tag(name='tag.name')
+        #         new_tag.save()
         self.update_tags_num()
         self.update_category_num()
 
