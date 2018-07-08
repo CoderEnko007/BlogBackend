@@ -35,15 +35,13 @@ class CategoryViewSet(viewsets.ModelViewSet):
     def perform_destroy(self, instance):
         categorys = Category.objects.filter(name=r'默认分类')
         if len(categorys) <= 0:
-            default_cate = Category(name=r'默认分类')
+            default_cate = Category.objects.create(name=r'默认分类')
             default_cate.save()
         else:
             default_cate = categorys[0]
 
         if instance.id == default_cate.id:
-            return Response({
-                'name': '不能删除默认分类'
-            }, status=status.HTTP_400_BAD_REQUEST)
+            return Response('不能删除默认分类', status=status.HTTP_400_BAD_REQUEST)
 
         posts = Post.objects.filter(category_id=instance.id)
         for post in posts:
@@ -124,7 +122,7 @@ class PostViewSet(viewsets.ModelViewSet):
         # for tag in post_tags:
         #     filter_tag = Tag.objects.filter(name=tag.name)
         #     if len(filter_tag) <= 0:
-        #         new_tag = Tag(name='tag.name')
+        #         new_tag = Tag.objects.create(name='tag.name')
         #         new_tag.save()
         self.update_tags_num()
         self.update_category_num()

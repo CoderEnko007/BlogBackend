@@ -28,11 +28,11 @@ from blog.views import CategoryViewSet, TagViewSet, PostViewSet, PostListViewSet
 from users.views import UserViewSet
 
 router = DefaultRouter()
-router.register(r'categorys', CategoryViewSet, base_name='categorys')
+router.register(r'category', CategoryViewSet, base_name='category')
 router.register(r'tags', TagViewSet, base_name='tags')
 router.register(r'posts', PostViewSet, base_name='posts')
-router.register(r'postList', PostListViewSet, base_name='postList')
-router.register(r'adminList', AdminListViewSet, base_name='adminList')
+# router.register(r'postList', PostListViewSet, base_name='postList')
+# router.register(r'adminList', AdminListViewSet, base_name='adminList')
 router.register(r'users', UserViewSet, base_name='users')
 
 urlpatterns = [

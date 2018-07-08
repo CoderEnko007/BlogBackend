@@ -13,7 +13,7 @@ class CategorySerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         record_name = Category.objects.filter(name=attrs['name'])
         if record_name:
-            raise serializers.ValidationError('该分类已存在')
+            raise serializers.ValidationError({'name': '该分类已存在'})
         return attrs
 
     class Meta:
@@ -29,7 +29,7 @@ class TagSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         record_name = Tag.objects.filter(name=attrs['name'])
         if record_name:
-            raise serializers.ValidationError('该标签已存在')
+            raise serializers.ValidationError({'name': '该标签已存在'})
         return attrs
 
     class Meta:

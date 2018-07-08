@@ -97,7 +97,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'blogbackend',
         'USER': 'root',
-        'PASSWORD': '666666',
+        'PASSWORD': '',
         'HOST': '127.0.0.1',
         'OPTION': { 'init_command': 'SET storage_engine=INNODB;' }
     }
